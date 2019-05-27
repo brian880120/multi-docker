@@ -1,0 +1,21 @@
+sudo: required
+services:
+  - docker
+
+before_install:
+  - docker build -t brian880120/client-test -f ./client/Dockerfile.dev ./client
+
+script:
+  - docker run brian880120/client-test npm test -- --coverage
+
+after_success:
+  - docker build -t brian880120/multi-client ./client
+  - docker build -t brian880120/multi-nginx ./nginx
+  - docker build -t brian880120/multi-server ./server
+  - docker build -t brian880120/multi-worker ./worker
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  - docker push brian880120/multi-client
+  - docker push brian880120/multi-nginx
+  - docker push brian880120/multi-server
+  - docker push brian880120/multi-worker
+  
